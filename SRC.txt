@@ -1,0 +1,96 @@
+<?php include 'includes/db.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Employee App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4 bg-light">
+    
+    <h1 class="mb-4 text-center">HR Dashboard</h1>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white fw-bold">
+            + Add New Employee
+        </div>
+        <div class="card-body">
+            <form action="add_employee.php" method="POST" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Position</label>
+                    <input type="text" name="position" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Department</label>
+                    <select name="department_id" class="form-select" required>
+                        <option value="" disabled selected>Choose a department...</option>
+                        <?php
+                        // Dynamically load departments from the DB into the dropdown
+                        $depts = $conn->query("SELECT * FROM departments");
+                        while($dept = $depts->fetch_assoc()) {
+                            echo "<option value='{$dept['id']}'>{$dept['dept_name']}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Entry Description / Notes</label>
+                    <textarea name="entry_description" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">Save Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white fw-bold">
+            Employee Directory
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Age</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $result = $conn->query("SELECT * FROM employees ORDER BY id DESC");
+                    while($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= $row['id'] ?></td>
+                        <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) ?></td>
+                        <td><?= htmlspecialchars($row['position']) ?></td>
+                        <td><?= $row['age'] ?></td>
+                        <td>
+                            <form action="delete_employee.php" method="POST" onsubmit="return confirm('Delete this employee?');" style="margin: 0;">
+                                <input type="hidden" name="employee_id" value="<?= $row['id'] ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
